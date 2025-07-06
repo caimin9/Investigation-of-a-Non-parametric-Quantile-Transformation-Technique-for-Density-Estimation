@@ -7,8 +7,8 @@ library(foreach)       # For foreach loops
 options(pillar.sigfig = 4)
 
 # Set up parallel backend
-num_cores <- detectCores() - 1  # Leave one core free for system processes
-cl <- makeCluster(num_cores)
+num_cores = detectCores() - 1  # Leave one core free for system processes
+cl = makeCluster(num_cores)
 registerDoParallel(cl)
 
 # Export necessary functions and libraries to the workers
@@ -180,7 +180,7 @@ run_combined_simulation = function(n, seed, shape, scale, initial_df) {
   
   # Construct the fitted MLE weibull PDF on the y_grid
   fd_pdf = dweibull(y_grid, shape = mle_shape, scale = mle_rate)
-  fd_pdf[is.infinite(fd_pdf)] <- 1e-30
+  fd_pdf[is.infinite(fd_pdf)] = 1e-30
   
   
   #------------------------------------------------------------------------------
@@ -222,9 +222,9 @@ run_combined_simulation = function(n, seed, shape, scale, initial_df) {
 
 
 # Run simulations in parallel
-n_values <- 100 * 2^(0:4)
-seeds <- 1:100
-weibull_params <- list(
+n_values = 100 * 2^(0:4)
+seeds = 1:100
+weibull_params = list(
   list(shape = 1.2, scale = 2)
   #list(shape = 1.5, scale = 3),
   #list(shape = 2.0, scale = 1.5),
@@ -233,39 +233,39 @@ weibull_params <- list(
 )
 
 # Define different df values to test
-initial_df_values <- c(2,4,6,8,10,12,14,16,18,20)
+initial_df_values = c(2,4,6,8,10,12,14,16,18,20)
 
 # Create expanded results storage
-results_all <- list()
+results_all = list()
 
 # Modified simulation loop using parallel processing
 for(gp in weibull_params) {
-  shape_val <- gp$shape
-  scale_val <- gp$scale
+  shape_val = gp$shape
+  scale_val = gp$scale
   
   for(initial_df in initial_df_values) {
     cat(sprintf("\nRunning simulations for shape=%g, scale=%g, initial_df=%g\n", 
                 shape_val, scale_val, initial_df))
     
-    results_combined <- data.frame()
-    density_examples <- list()
+    results_combined = data.frame()
+    density_examples = list()
     
     # Parallelize across n and seed combinations
     # Create all combinations of parameters
-    param_grid <- expand.grid(n = n_values, seed = seeds)
+    param_grid = expand.grid(n = n_values, seed = seeds)
     
     # Run parallel foreach loop
-    parallel_results <- foreach(i = 1:nrow(param_grid), .combine = rbind, 
+    parallel_results = foreach(i = 1:nrow(param_grid), .combine = rbind, 
                                 .packages = c("dplyr", "MASS")) %dopar% {
-                                  n <- param_grid$n[i]
-                                  seed <- param_grid$seed[i]
+                                  n = param_grid$n[i]
+                                  seed = param_grid$seed[i]
                                   
                                   # For progress tracking (will print from each worker)
                                   cat(sprintf("Running simulation: n=%d, seed=%d on worker %d\n", 
                                               n, seed, Sys.getpid()))
                                   
                                   # Run the simulation
-                                  sim_result <- run_combined_simulation(n, seed, shape_val, scale_val, initial_df)
+                                  sim_result = run_combined_simulation(n, seed, shape_val, scale_val, initial_df)
                                   
                                   # Return results as data frame
                                   data.frame(
@@ -287,20 +287,20 @@ for(gp in weibull_params) {
                                 }
     
     # Combine results
-    results_combined <- parallel_results
+    results_combined = parallel_results
     
     # Extract density examples separately (only for seed==1)
     for(n in n_values) {
       # Run one more time for seed 1 to get densities
       # (alternatively, you could modify the parallel code to return densities,
       # but this keeps the memory usage lower during parallel execution)
-      sim_result <- run_combined_simulation(n, 1, shape_val, scale_val, initial_df)
-      density_examples[[as.character(n)]] <- sim_result$densities
+      sim_result = run_combined_simulation(n, 1, shape_val, scale_val, initial_df)
+      density_examples[[as.character(n)]] = sim_result$densities
     }
     
     # Store results with df in key
-    key <- sprintf("shape_%g_scale_%g_df_%g", shape_val, scale_val, initial_df)
-    results_all[[key]] <- list(
+    key = sprintf("shape_%g_scale_%g_df_%g", shape_val, scale_val, initial_df)
+    results_all[[key]] = list(
       results = results_combined,
       densities = density_examples
     )
@@ -315,7 +315,7 @@ stopCluster(cl)
 #########################################################################################################
 
 
-#results_all <- readRDS("Weibull_results_all.rds") #Do this if data already saved
+#results_all = readRDS("Weibull_results_all.rds") #Do this if data already saved
 
 
 # Save results
@@ -353,7 +353,7 @@ for(n in n_values) {
 par(mfrow = c(1, 1), mar = c(4, 4, 3, 1))
 
 # Define point characters for each estimator
-pch_vals <- c(NA, 16, 17, 15, 18)  # solid circle, triangle, square, diamond
+pch_vals = c(NA, 16, 17, 15, 18)  # solid circle, triangle, square, diamond
 
 for(n in n_values) {
   dens = density_examples[[as.character(n)]]
@@ -471,7 +471,7 @@ for(gp in weibull_params) {
 
 
   # Define a better color palette (more distinguishable than rainbow)
-  colors <- c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33")
+  colors = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33")
   
   # Set up the plot with improved parameters
   par(mar = c(5, 5, 4, 2))  # Increase margins for labels
@@ -521,8 +521,8 @@ for(gp in weibull_params) {
 
 #####################################
 # Define a better color palette and point styles
-colors <- c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33")
-point_styles <- c(16, 17, 15, 18, 3, 8)  # Solid circle, triangle, square, diamond, plus, star
+colors = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33")
+point_styles = c(16, 17, 15, 18, 3, 8)  # Solid circle, triangle, square, diamond, plus, star
 
 # Set up the plot
 par(mar = c(5, 5, 4, 8))
@@ -539,8 +539,8 @@ grid(nx = NULL, ny = NULL, lty = "dotted", col = "gray80")
 
 # Loop through n-values with different point characters
 for(i in seq_along(n_values)) {
-  n_val <- n_values[i]
-  subset_data <- df_summary[df_summary$n == n_val, ]
+  n_val = n_values[i]
+  subset_data = df_summary[df_summary$n == n_val, ]
   lines(subset_data$initial_df, log(subset_data$mean_ise), 
         col = colors[i],
         type = "o",
@@ -735,7 +735,7 @@ for(gp in weibull_params) {
   print(df_summary)
   
   # Define a better color palette
-  colors <- c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33")
+  colors = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00", "#FFFF33")
   
   # Set up the plot with improved parameters
   par(mar = c(5, 6, 4, 8))  # Increased right margin for legend
@@ -801,7 +801,7 @@ plot(summary_stats$n,log(summary_stats$iter_mean))
 #################################################################################### 
 ############################ Statistics bY RESULTS 
 ####################################################################################
-all_results_df <- do.call(rbind, lapply(results_all, function(x) x$results))
+all_results_df = do.call(rbind, lapply(results_all, function(x) x$results))
 
 # 2. Summarise 
 ## Do 4 Groupings (order matters on how you write them)
@@ -809,7 +809,7 @@ all_results_df <- do.call(rbind, lapply(results_all, function(x) x$results))
 # by shape, scale , n
 # by nothing
 # by shape,scale
-overall_summary <- all_results_df %>%
+overall_summary = all_results_df %>%
   group_by(shape,scale,n) %>%
   summarise(
     mean_iter_ise   = mean(iter_ise),
@@ -835,7 +835,7 @@ names(all_results_df)
 ######## Relative Efficiency
 ##############################################################################
 
-summary_table <- all_results_df %>%
+summary_table = all_results_df %>%
   group_by(shape, scale,n) %>%
   summarize(
     mean_iter_vs_direct = mean(iter_ise/direct_ise),
@@ -851,7 +851,7 @@ print(summary_table, n =100)
 
 
 # First, create the relative efficiency columns in your original dataset
-all_results_df <- all_results_df %>%
+all_results_df = all_results_df %>%
   mutate(
     iter_vs_direct = iter_ise/direct_ise,
     direct_vs_kde = direct_ise/kde_ise,
@@ -863,11 +863,11 @@ for(shp in unique(all_results_df$shape)) {
   for(scl in unique(all_results_df$scale[all_results_df$shape == shp])) {
     
     # Filter data for this specific distribution
-    dist_data <- all_results_df %>% 
+    dist_data = all_results_df %>% 
       filter(shape == shp, scale == scl)
     
     # Calculate mean relative efficiency for each sample size
-    mean_data <- dist_data %>%
+    mean_data = dist_data %>%
       group_by(n) %>%
       summarize(
         mean_iter_vs_direct = mean(iter_vs_direct),
@@ -918,7 +918,7 @@ for(shp in unique(all_results_df$shape)) {
 #######################################################################
 ########## Iter vs KDE
 ###########################################################################
-comparison_data <- all_results_df %>%
+comparison_data = all_results_df %>%
   group_by(shape, scale, n) %>%
   summarize(
     mean_iter_vs_kde = mean(iter_vs_kde),
@@ -942,13 +942,13 @@ axis(1, at = unique(comparison_data$n), labels = unique(comparison_data$n))
 abline(h = 1, lty = 2, col = "gray")
 
 # Define colors for different distributions
-dist_colors <- rainbow(length(unique(paste0(comparison_data$shape, "-", comparison_data$scale))))
-dist_counter <- 1
+dist_colors = rainbow(length(unique(paste0(comparison_data$shape, "-", comparison_data$scale))))
+dist_counter = 1
 
 # Add lines for each distribution
 for(shp in unique(comparison_data$shape)) {
   for(scl in unique(comparison_data$scale[comparison_data$shape == shp])) {
-    dist_data <- comparison_data %>% 
+    dist_data = comparison_data %>% 
       filter(shape == shp, scale == scl) %>%
       arrange(n) # Make sure data is ordered by sample size
     
@@ -957,12 +957,12 @@ for(shp in unique(comparison_data$shape)) {
           col = dist_colors[dist_counter], 
           pch = 15 + dist_counter)
     
-    dist_counter <- dist_counter + 1
+    dist_counter = dist_counter + 1
   }
 }
 
 # Add legend
-legend_labels <- paste0("Weibull(", 
+legend_labels = paste0("Weibull(", 
                         unique(comparison_data$shape), 
                         ",", 
                         unique(comparison_data$scale), 
@@ -982,7 +982,7 @@ legend("topright",
 ########## NW vs KDE
 ###########################################################################
 
-comparison_data <- all_results_df %>%
+comparison_data = all_results_df %>%
   group_by(shape, scale, n) %>%
   summarize(
     mean_direct_vs_kde = mean(direct_vs_kde),
@@ -1006,13 +1006,13 @@ axis(1, at = unique(comparison_data$n), labels = unique(comparison_data$n))
 abline(h = 1, lty = 2, col = "gray")
 
 # Define colors for different distributions
-dist_colors <- rainbow(length(unique(paste0(comparison_data$shape, "-", comparison_data$scale))))
-dist_counter <- 1
+dist_colors = rainbow(length(unique(paste0(comparison_data$shape, "-", comparison_data$scale))))
+dist_counter = 1
 
 # Add lines for each distribution
 for(shp in unique(comparison_data$shape)) {
   for(scl in unique(comparison_data$scale[comparison_data$shape == shp])) {
-    dist_data <- comparison_data %>% 
+    dist_data = comparison_data %>% 
       filter(shape == shp, scale == scl) %>%
       arrange(n) # Make sure data is ordered by sample size
     
@@ -1021,12 +1021,12 @@ for(shp in unique(comparison_data$shape)) {
           col = dist_colors[dist_counter], 
           pch = 15 + dist_counter)
     
-    dist_counter <- dist_counter + 1
+    dist_counter = dist_counter + 1
   }
 }
 
 # Add legend
-legend_labels <- paste0("Weibull(", 
+legend_labels = paste0("Weibull(", 
                         unique(comparison_data$shape), 
                         ",", 
                         unique(comparison_data$scale), 
@@ -1046,7 +1046,7 @@ legend("topright",
 ########## For Iter vs direct
 ###########################################################################
 
-comparison_data <- all_results_df %>%
+comparison_data = all_results_df %>%
   group_by(shape, scale, n) %>%
   summarize(
     mean_iter_vs_direct = mean(iter_vs_direct),
@@ -1070,13 +1070,13 @@ axis(1, at = unique(comparison_data$n), labels = unique(comparison_data$n))
 abline(h = 1, lty = 2, col = "gray")
 
 # Define colors for different distributions
-dist_colors <- rainbow(length(unique(paste0(comparison_data$shape, "-", comparison_data$scale))))
-dist_counter <- 1
+dist_colors = rainbow(length(unique(paste0(comparison_data$shape, "-", comparison_data$scale))))
+dist_counter = 1
 
 # Add lines for each distribution
 for(shp in unique(comparison_data$shape)) {
   for(scl in unique(comparison_data$scale[comparison_data$shape == shp])) {
-    dist_data <- comparison_data %>% 
+    dist_data = comparison_data %>% 
       filter(shape == shp, scale == scl) %>%
       arrange(n) # Make sure data is ordered by sample size
     
@@ -1085,12 +1085,12 @@ for(shp in unique(comparison_data$shape)) {
           col = dist_colors[dist_counter], 
           pch = 15 + dist_counter)
     
-    dist_counter <- dist_counter + 1
+    dist_counter = dist_counter + 1
   }
 }
 
 # Add legend
-legend_labels <- paste0("Weibull(", 
+legend_labels = paste0("Weibull(", 
                         unique(comparison_data$shape), 
                         ",", 
                         unique(comparison_data$scale), 
@@ -1126,16 +1126,16 @@ legend("topright",
 ############################################################################################################
 
 par(mfrow = c(1,1))
-weibull_params <- unique(all_results_df[, c("shape", "scale")])
+weibull_params = unique(all_results_df[, c("shape", "scale")])
 for (i in 1:nrow(weibull_params)) {
   
-  current_shape <- weibull_params$shape[i]
-  current_scale <- weibull_params$scale[i]
+  current_shape = weibull_params$shape[i]
+  current_scale = weibull_params$scale[i]
   
-  df_subset <- subset(all_results_df, shape == current_shape & scale == current_scale)
+  df_subset = subset(all_results_df, shape == current_shape & scale == current_scale)
   
   # Calculate mean for log(ISE)
-  summary_stats <- df_subset %>%
+  summary_stats = df_subset %>%
     group_by(n) %>%
     summarise(
       mean_log_ise = mean(log(iter_ise)),
@@ -1144,32 +1144,32 @@ for (i in 1:nrow(weibull_params)) {
     arrange(n)
   
   # Calculate the slope using linear regression
-  x_values <- log(summary_stats$n)
-  y_values <- summary_stats$mean_log_ise
+  x_values = log(summary_stats$n)
+  y_values = summary_stats$mean_log_ise
   
   # Fit linear model to get overall slope
-  lm_fit <- lm(y_values ~ x_values)
-  overall_slope <- coef(lm_fit)[2]
+  lm_fit = lm(y_values ~ x_values)
+  overall_slope = coef(lm_fit)[2]
   
   # Calculate segment slopes between adjacent points
-  segment_slopes <- numeric(length(x_values) - 1)
+  segment_slopes = numeric(length(x_values) - 1)
   for (j in 1:(length(x_values) - 1)) {
-    segment_slopes[j] <- (y_values[j+1] - y_values[j]) / (x_values[j+1] - x_values[j])
+    segment_slopes[j] = (y_values[j+1] - y_values[j]) / (x_values[j+1] - x_values[j])
   }
   
   # Same colour scheme as before
-  box_color <- "#B3D9FF"  # Light blue for boxplots
-  line_color <- "#0066CC"  # Darker blue for the line
-  point_color <- "#003366"  # Even darker blue for points
-  ref_color <- "#CC3366"    # Pink/red for reference line
-  slope_color <- "#228B22"  # Green for slope values
+  box_color = "#B3D9FF"  # Light blue for boxplots
+  line_color = "#0066CC"  # Darker blue for the line
+  point_color = "#003366"  # Even darker blue for points
+  ref_color = "#CC3366"    # Pink/red for reference line
+  slope_color = "#228B22"  # Green for slope values
   
   # Improve the layout and margins
   par(mar = c(5, 5, 4, 2), bg = "white")
   
   # Set up the plot with appropriate axis limits
-  y_range <- range(log(df_subset$iter_ise), na.rm = TRUE)
-  y_padding <- 0.1 * diff(y_range)
+  y_range = range(log(df_subset$iter_ise), na.rm = TRUE)
+  y_padding = 0.1 * diff(y_range)
   
   
   # Create empty plot with grid
@@ -1195,7 +1195,7 @@ for (i in 1:nrow(weibull_params)) {
   
   # Add boxplots at each sample size with improved appearance
   for (n_val in n_values) {
-    n_subset <- subset(df_subset, n == n_val)
+    n_subset = subset(df_subset, n == n_val)
     boxplot(log(n_subset$iter_ise), add = TRUE, at = log(n_val),
             boxwex = 0.3, col = box_color, outline = TRUE,
             outcol = "gray40", outpch = 20, outcex = 0.5, 
@@ -1211,22 +1211,22 @@ for (i in 1:nrow(weibull_params)) {
          pch = 16, col = point_color, cex = 1.1)
   
   # Add a reference line showing n^(-4/5) convergence rate
-  n_ref <- n_values[1]
-  ise_ref <- exp(summary_stats$mean_log_ise[summary_stats$n == n_ref])
-  theoretical_line <- log(ise_ref) - 4/5 * (log(n_values) - log(n_ref))
+  n_ref = n_values[1]
+  ise_ref = exp(summary_stats$mean_log_ise[summary_stats$n == n_ref])
+  theoretical_line = log(ise_ref) - 4/5 * (log(n_values) - log(n_ref))
   lines(log(n_values), theoretical_line, col = ref_color, lwd = 2, lty = 2)
   
   # Add segment slope annotations
   for (j in 1:(length(x_values) - 1)) {
-    mid_x <- (x_values[j] + x_values[j+1]) / 2
-    mid_y <- (y_values[j] + y_values[j+1]) / 2 + 0.5  # Position above the line
+    mid_x = (x_values[j] + x_values[j+1]) / 2
+    mid_y = (y_values[j] + y_values[j+1]) / 2 + 0.5  # Position above the line
     text(mid_x, mid_y, sprintf("%.2f", segment_slopes[j]), 
          cex = 0.8, col = slope_color)
   }
   
   # Change the text box position to top right
-  text_box <- par("usr")[2] - 0.3 * diff(par("usr")[1:2])
-  text_box_y <- par("usr")[4] - 0.25 * diff(par("usr")[3:4])
+  text_box = par("usr")[2] - 0.3 * diff(par("usr")[1:2])
+  text_box_y = par("usr")[4] - 0.25 * diff(par("usr")[3:4])
   
   # Create a better looking text box for the slope info
   rect(text_box - 1.5, 
@@ -1263,16 +1263,16 @@ for (i in 1:nrow(weibull_params)) {
 ############################################################################################################
 
 par(mfrow = c(1,1))
-weibull_params <- unique(all_results_df[, c("shape", "scale")])
+weibull_params = unique(all_results_df[, c("shape", "scale")])
 for (i in 1:nrow(weibull_params)) {
   
-  current_shape <- weibull_params$shape[i]
-  current_scale <- weibull_params$scale[i]
+  current_shape = weibull_params$shape[i]
+  current_scale = weibull_params$scale[i]
   
-  df_subset <- subset(all_results_df, shape == current_shape & scale == current_scale)
+  df_subset = subset(all_results_df, shape == current_shape & scale == current_scale)
   
   # Calculate mean for log(ISE)
-  summary_stats <- df_subset %>%
+  summary_stats = df_subset %>%
     group_by(n) %>%
     summarise(
       mean_log_ise = mean(log(kde_ise)),
@@ -1281,32 +1281,32 @@ for (i in 1:nrow(weibull_params)) {
     arrange(n)
   
   # Calculate the slope using linear regression
-  x_values <- log(summary_stats$n)
-  y_values <- summary_stats$mean_log_ise
+  x_values = log(summary_stats$n)
+  y_values = summary_stats$mean_log_ise
   
   # Fit linear model to get overall slope
-  lm_fit <- lm(y_values ~ x_values)
-  overall_slope <- coef(lm_fit)[2]
+  lm_fit = lm(y_values ~ x_values)
+  overall_slope = coef(lm_fit)[2]
   
   # Calculate segment slopes between adjacent points
-  segment_slopes <- numeric(length(x_values) - 1)
+  segment_slopes = numeric(length(x_values) - 1)
   for (j in 1:(length(x_values) - 1)) {
-    segment_slopes[j] <- (y_values[j+1] - y_values[j]) / (x_values[j+1] - x_values[j])
+    segment_slopes[j] = (y_values[j+1] - y_values[j]) / (x_values[j+1] - x_values[j])
   }
   
   # Same colour scheme as before
-  box_color <- "#B3D9FF"  # Light blue for boxplots
-  line_color <- "#0066CC"  # Darker blue for the line
-  point_color <- "#003366"  # Even darker blue for points
-  ref_color <- "#CC3366"    # Pink/red for reference line
-  slope_color <- "#228B22"  # Green for slope values
+  box_color = "#B3D9FF"  # Light blue for boxplots
+  line_color = "#0066CC"  # Darker blue for the line
+  point_color = "#003366"  # Even darker blue for points
+  ref_color = "#CC3366"    # Pink/red for reference line
+  slope_color = "#228B22"  # Green for slope values
   
   # Improve the layout and margins
   par(mar = c(5, 5, 4, 2), bg = "white")
   
   # Set up the plot with appropriate axis limits
-  y_range <- range(log(df_subset$kde_ise), na.rm = TRUE)
-  y_padding <- 0.1 * diff(y_range)
+  y_range = range(log(df_subset$kde_ise), na.rm = TRUE)
+  y_padding = 0.1 * diff(y_range)
   
   # Create empty plot with grid
   plot(log(summary_stats$n), summary_stats$mean_log_ise,
@@ -1332,7 +1332,7 @@ for (i in 1:nrow(weibull_params)) {
   
   # Add boxplots at each sample size with improved appearance
   for (n_val in n_values) {
-    n_subset <- subset(df_subset, n == n_val)
+    n_subset = subset(df_subset, n == n_val)
     boxplot(log(n_subset$kde_ise), add = TRUE, at = log(n_val),
             boxwex = 0.3, col = box_color, outline = TRUE,
             outcol = "gray40", outpch = 20, outcex = 0.5, 
@@ -1348,22 +1348,22 @@ for (i in 1:nrow(weibull_params)) {
          pch = 16, col = point_color, cex = 1.1)
   
   # Add a reference line showing n^(-4/5) convergence rate
-  n_ref <- n_values[1]
-  ise_ref <- exp(summary_stats$mean_log_ise[summary_stats$n == n_ref])
-  theoretical_line <- log(ise_ref) - 4/5 * (log(n_values) - log(n_ref))
+  n_ref = n_values[1]
+  ise_ref = exp(summary_stats$mean_log_ise[summary_stats$n == n_ref])
+  theoretical_line = log(ise_ref) - 4/5 * (log(n_values) - log(n_ref))
   lines(log(n_values), theoretical_line, col = ref_color, lwd = 2, lty = 2)
   
   # Add segment slope annotations
   for (j in 1:(length(x_values) - 1)) {
-    mid_x <- (x_values[j] + x_values[j+1]) / 2
-    mid_y <- (y_values[j] + y_values[j+1]) / 2 + 0.5  # Position above the line
+    mid_x = (x_values[j] + x_values[j+1]) / 2
+    mid_y = (y_values[j] + y_values[j+1]) / 2 + 0.5  # Position above the line
     text(mid_x, mid_y, sprintf("%.2f", segment_slopes[j]), 
          cex = 0.8, col = slope_color)
   }
   
   # Change the text box position to top right
-  text_box <- par("usr")[2] - 0.3 * diff(par("usr")[1:2])
-  text_box_y <- par("usr")[4] - 0.25 * diff(par("usr")[3:4])
+  text_box = par("usr")[2] - 0.3 * diff(par("usr")[1:2])
+  text_box_y = par("usr")[4] - 0.25 * diff(par("usr")[3:4])
   
   # Create a better looking text box for the slope info
   rect(text_box - 1.5, 
@@ -1400,16 +1400,16 @@ for (i in 1:nrow(weibull_params)) {
 ############################################################################################################
 
 par(mfrow = c(1,1))
-weibull_params <- unique(all_results_df[, c("shape", "scale")])
+weibull_params = unique(all_results_df[, c("shape", "scale")])
 for (i in 1:nrow(weibull_params)) {
   
-  current_shape <- weibull_params$shape[i]
-  current_scale <- weibull_params$scale[i]
+  current_shape = weibull_params$shape[i]
+  current_scale = weibull_params$scale[i]
   
-  df_subset <- subset(all_results_df, shape == current_shape & scale == current_scale)
+  df_subset = subset(all_results_df, shape == current_shape & scale == current_scale)
   
   # Calculate mean for log(ISE)
-  summary_stats <- df_subset %>%
+  summary_stats = df_subset %>%
     group_by(n) %>%
     summarise(
       mean_log_ise = mean(log(direct_ise)),
@@ -1418,17 +1418,17 @@ for (i in 1:nrow(weibull_params)) {
     arrange(n)
   
   # Calculate the slope using linear regression
-  x_values <- log(summary_stats$n)
-  y_values <- summary_stats$mean_log_ise
+  x_values = log(summary_stats$n)
+  y_values = summary_stats$mean_log_ise
   
   # Fit linear model to get overall slope
-  lm_fit <- lm(y_values ~ x_values)
-  overall_slope <- coef(lm_fit)[2]
+  lm_fit = lm(y_values ~ x_values)
+  overall_slope = coef(lm_fit)[2]
   
   # Calculate segment slopes between adjacent points
-  segment_slopes <- numeric(length(x_values) - 1)
+  segment_slopes = numeric(length(x_values) - 1)
   for (j in 1:(length(x_values) - 1)) {
-    segment_slopes[j] <- (y_values[j+1] - y_values[j]) / (x_values[j+1] - x_values[j])
+    segment_slopes[j] = (y_values[j+1] - y_values[j]) / (x_values[j+1] - x_values[j])
   }
   
   
@@ -1439,8 +1439,8 @@ for (i in 1:nrow(weibull_params)) {
   par(mar = c(5, 5, 4, 2), bg = "white")
   
   # Set up the plot with appropriate axis limits
-  y_range <- range(log(df_subset$direct_ise), na.rm = TRUE)
-  y_padding <- 0.1 * diff(y_range)
+  y_range = range(log(df_subset$direct_ise), na.rm = TRUE)
+  y_padding = 0.1 * diff(y_range)
   
   # Create empty plot with grid
   plot(log(summary_stats$n), summary_stats$mean_log_ise,
@@ -1465,7 +1465,7 @@ for (i in 1:nrow(weibull_params)) {
   
   # Add boxplots at each sample size with improved appearance
   for (n_val in n_values) {
-    n_subset <- subset(df_subset, n == n_val)
+    n_subset = subset(df_subset, n == n_val)
     boxplot(log(n_subset$direct_ise), add = TRUE, at = log(n_val),
             boxwex = 0.3, col = box_color, outline = TRUE,
             outcol = "gray40", outpch = 20, outcex = 0.5, 
@@ -1481,22 +1481,22 @@ for (i in 1:nrow(weibull_params)) {
          pch = 16, col = point_color, cex = 1.1)
   
   # Add a reference line showing n^(-4/5) convergence rate
-  n_ref <- n_values[1]
-  ise_ref <- exp(summary_stats$mean_log_ise[summary_stats$n == n_ref])
-  theoretical_line <- log(ise_ref) - 4/5 * (log(n_values) - log(n_ref))
+  n_ref = n_values[1]
+  ise_ref = exp(summary_stats$mean_log_ise[summary_stats$n == n_ref])
+  theoretical_line = log(ise_ref) - 4/5 * (log(n_values) - log(n_ref))
   lines(log(n_values), theoretical_line, col = ref_color, lwd = 2, lty = 2)
   
   # Add segment slope annotations with increased vertical offset
   for (j in 1:(length(x_values) - 1)) {
-    mid_x <- (x_values[j] + x_values[j+1]) / 2
-    mid_y <- (y_values[j] + y_values[j+1]) / 2 + 0.8  # Increased vertical offset
+    mid_x = (x_values[j] + x_values[j+1]) / 2
+    mid_y = (y_values[j] + y_values[j+1]) / 2 + 0.8  # Increased vertical offset
     text(mid_x, mid_y, sprintf("%.2f", segment_slopes[j]), 
          cex = 0.8, col = slope_color)
   }
   
   # Add text box for slope info
-  text_box <- par("usr")[2] - 0.3 * diff(par("usr")[1:2])
-  text_box_y <- par("usr")[4] - 0.25 * diff(par("usr")[3:4])
+  text_box = par("usr")[2] - 0.3 * diff(par("usr")[1:2])
+  text_box_y = par("usr")[4] - 0.25 * diff(par("usr")[3:4])
   
   # Create a better looking text box for the slope info
   rect(text_box - 1.5, 
@@ -1531,15 +1531,15 @@ for (i in 1:nrow(weibull_params)) {
 ############################################################################################################
 
 par(mfrow = c(1,1))
-weibull_params <- unique(all_results_df[, c("shape", "scale")])
+weibull_params = unique(all_results_df[, c("shape", "scale")])
 for (i in 1:nrow(weibull_params)) {
-  current_shape <- weibull_params$shape[i]
-  current_scale <- weibull_params$scale[i]
+  current_shape = weibull_params$shape[i]
+  current_scale = weibull_params$scale[i]
   
-  df_subset <- subset(all_results_df, shape == current_shape & scale == current_scale)
+  df_subset = subset(all_results_df, shape == current_shape & scale == current_scale)
   
   # Calculate mean for log(ISE)
-  summary_stats <- df_subset %>%
+  summary_stats = df_subset %>%
     group_by(n) %>%
     summarise(
       mean_log_ise = mean(log(fd_ise)),
@@ -1548,17 +1548,17 @@ for (i in 1:nrow(weibull_params)) {
     arrange(n)
   
   # Calculate the slope using linear regression
-  x_values <- log(summary_stats$n)
-  y_values <- summary_stats$mean_log_ise
+  x_values = log(summary_stats$n)
+  y_values = summary_stats$mean_log_ise
   
   # Fit linear model to get overall slope
-  lm_fit <- lm(y_values ~ x_values)
-  overall_slope <- coef(lm_fit)[2]
+  lm_fit = lm(y_values ~ x_values)
+  overall_slope = coef(lm_fit)[2]
   
   # Calculate segment slopes between adjacent points
-  segment_slopes <- numeric(length(x_values) - 1)
+  segment_slopes = numeric(length(x_values) - 1)
   for (j in 1:(length(x_values) - 1)) {
-    segment_slopes[j] <- (y_values[j+1] - y_values[j]) / (x_values[j+1] - x_values[j])
+    segment_slopes[j] = (y_values[j+1] - y_values[j]) / (x_values[j+1] - x_values[j])
   }
   
   
@@ -1566,8 +1566,8 @@ for (i in 1:nrow(weibull_params)) {
   par(mar = c(5, 5, 4, 2), bg = "white")
   
   # Set up the plot with appropriate axis limits
-  y_range <- range(log(df_subset$fd_ise), na.rm = TRUE)
-  y_padding <- 0.1 * diff(y_range)
+  y_range = range(log(df_subset$fd_ise), na.rm = TRUE)
+  y_padding = 0.1 * diff(y_range)
   
   # Create empty plot with grid
   plot(log(summary_stats$n), summary_stats$mean_log_ise,
@@ -1592,7 +1592,7 @@ for (i in 1:nrow(weibull_params)) {
   
   # Add boxplots at each sample size with improved appearance
   for (n_val in n_values) {
-    n_subset <- subset(df_subset, n == n_val)
+    n_subset = subset(df_subset, n == n_val)
     boxplot(log(n_subset$fd_ise), add = TRUE, at = log(n_val),
             boxwex = 0.3, col = box_color, outline = TRUE,
             outcol = "gray40", outpch = 20, outcex = 0.5, 
@@ -1608,22 +1608,22 @@ for (i in 1:nrow(weibull_params)) {
          pch = 16, col = point_color, cex = 1.1)
   
   # Add a reference line showing n^(-4/5) convergence rate
-  n_ref <- n_values[1]
-  ise_ref <- exp(summary_stats$mean_log_ise[summary_stats$n == n_ref])
-  theoretical_line <- log(ise_ref) - 4/5 * (log(n_values) - log(n_ref))
+  n_ref = n_values[1]
+  ise_ref = exp(summary_stats$mean_log_ise[summary_stats$n == n_ref])
+  theoretical_line = log(ise_ref) - 4/5 * (log(n_values) - log(n_ref))
   lines(log(n_values), theoretical_line, col = ref_color, lwd = 2, lty = 2)
   
   # Add segment slope annotations with increased vertical offset
   for (j in 1:(length(x_values) - 1)) {
-    mid_x <- (x_values[j] + x_values[j+1]) / 2
-    mid_y <- (y_values[j] + y_values[j+1]) / 2 + 1.6  # Increased vertical offset
+    mid_x = (x_values[j] + x_values[j+1]) / 2
+    mid_y = (y_values[j] + y_values[j+1]) / 2 + 1.6  # Increased vertical offset
     text(mid_x, mid_y, sprintf("%.2f", segment_slopes[j]), 
          cex = 0.8, col = slope_color)
   }
   
   # Add text box for slope info
-  text_box <- par("usr")[2] - 0.3 * diff(par("usr")[1:2])
-  text_box_y <- par("usr")[4] - 0.25 * diff(par("usr")[3:4])
+  text_box = par("usr")[2] - 0.3 * diff(par("usr")[1:2])
+  text_box_y = par("usr")[4] - 0.25 * diff(par("usr")[3:4])
   
   # Create a better looking text box for the slope info
   rect(text_box - 1.5, 
@@ -1686,9 +1686,9 @@ for (i in 1:nrow(weibull_params)) {
 ################## ALL THE ESTIMATOR BOXPLOTS AT ONCE
 ##############################################################################################################
 # Function to analyze convergence rates
-analyze_convergence <- function(df_subset, n_values, estimator_name = "IW", ise_column = "iter_ise") {
+analyze_convergence = function(df_subset, n_values, estimator_name = "IW", ise_column = "iter_ise") {
   # Calculate mean and other statistics for log(ISE)
-  summary_stats <- df_subset %>%
+  summary_stats = df_subset %>%
     group_by(n) %>%
     summarise(
       mean_log_ise = mean(log(!!sym(ise_column))),
@@ -1701,22 +1701,22 @@ analyze_convergence <- function(df_subset, n_values, estimator_name = "IW", ise_
     arrange(n)
   
   # Calculate the slope using linear regression
-  x_values <- log(summary_stats$n)
-  y_values <- summary_stats$mean_log_ise
+  x_values = log(summary_stats$n)
+  y_values = summary_stats$mean_log_ise
   
   # Fit linear model to get overall slope
-  lm_fit <- lm(y_values ~ x_values)
-  overall_slope <- coef(lm_fit)[2]
-  conf_int <- confint(lm_fit, "x_values", level = 0.95)
+  lm_fit = lm(y_values ~ x_values)
+  overall_slope = coef(lm_fit)[2]
+  conf_int = confint(lm_fit, "x_values", level = 0.95)
   
   # Calculate segment slopes between adjacent points
-  segment_slopes <- numeric(length(x_values) - 1)
+  segment_slopes = numeric(length(x_values) - 1)
   for (j in 1:(length(x_values) - 1)) {
-    segment_slopes[j] <- (y_values[j+1] - y_values[j]) / (x_values[j+1] - x_values[j])
+    segment_slopes[j] = (y_values[j+1] - y_values[j]) / (x_values[j+1] - x_values[j])
   }
   
   # Calculate theoretical convergence rate for this estimator
-  theoretical_rate <- switch(estimator_name,
+  theoretical_rate = switch(estimator_name,
                              "IW" = -4/5,
                              "KDE" = -4/5,
                              "NW" = -4/5,
@@ -1736,19 +1736,19 @@ analyze_convergence <- function(df_subset, n_values, estimator_name = "IW", ise_
 }
 
 # Function to create enhanced plots with cleaner visualization
-create_enhanced_plot <- function(df_subset, analysis_results, shape, scale, 
+create_enhanced_plot = function(df_subset, analysis_results, shape, scale, 
                                  n_values, estimator_name = "IW", ise_column = "iter_ise") {
   # Extract analysis results
-  summary_stats <- analysis_results$summary_stats
-  x_values <- analysis_results$x_values
-  y_values <- analysis_results$y_values
-  overall_slope <- analysis_results$overall_slope
-  conf_int <- analysis_results$conf_int
-  segment_slopes <- analysis_results$segment_slopes
-  theoretical_rate <- analysis_results$theoretical_rate
+  summary_stats = analysis_results$summary_stats
+  x_values = analysis_results$x_values
+  y_values = analysis_results$y_values
+  overall_slope = analysis_results$overall_slope
+  conf_int = analysis_results$conf_int
+  segment_slopes = analysis_results$segment_slopes
+  theoretical_rate = analysis_results$theoretical_rate
   
   # Get full estimator name
-  full_estimator_name <- switch(estimator_name,
+  full_estimator_name = switch(estimator_name,
                                 "IW" = "Iterative Weights",
                                 "NW" = "Normal Weights",
                                 "KDE" = "KDE",
@@ -1756,30 +1756,30 @@ create_enhanced_plot <- function(df_subset, analysis_results, shape, scale,
                                 estimator_name)
   
   # Updated color scheme with more distinguishable colors
-  box_color <- switch(estimator_name,
+  box_color = switch(estimator_name,
                       "IW" = "#A1D8E6",    # Light blue
                       "NW" = "#FFB366",    # Light orange
                       "KDE" = "#B3E6B3",   # Light green
                       "FD" = "#E6B3CC",    # Light purple
                       "#A1C9F4")           # Default light blue
   
-  line_color <- switch(estimator_name,
+  line_color = switch(estimator_name,
                        "IW" = "#0066CC",    # Dark blue
                        "NW" = "#FF6600",    # Orange
                        "KDE" = "#009933",   # Dark green
                        "FD" = "#CC3366",    # Dark purple
                        "#0072B2")           # Default blue
   
-  point_color <- line_color
-  ref_color <- "#D55E00"   # Orange-red for reference line
-  slope_color <- "#228B22"  # Green for slope values
+  point_color = line_color
+  ref_color = "#D55E00"   # Orange-red for reference line
+  slope_color = "#228B22"  # Green for slope values
   
   # Improve the layout and margins
   par(mar = c(5, 5, 4, 2), bg = "white")
   
   # Set up the plot with appropriate axis limits
-  y_range <- range(log(df_subset[[ise_column]]), na.rm = TRUE)
-  y_padding <- 0.1 * diff(y_range)
+  y_range = range(log(df_subset[[ise_column]]), na.rm = TRUE)
+  y_padding = 0.1 * diff(y_range)
   
   # Create empty plot with grid
   plot(x_values, y_values,
@@ -1803,7 +1803,7 @@ create_enhanced_plot <- function(df_subset, analysis_results, shape, scale,
   
   # Add boxplots at each sample size with improved appearance
   for (n_val in n_values) {
-    n_subset <- subset(df_subset, n == n_val)
+    n_subset = subset(df_subset, n == n_val)
     boxplot(log(n_subset[[ise_column]]), add = TRUE, at = log(n_val),
             boxwex = 0.3, col = box_color, outline = TRUE,
             outcol = "gray40", outpch = 20, outcex = 0.5, 
@@ -1819,23 +1819,23 @@ create_enhanced_plot <- function(df_subset, analysis_results, shape, scale,
          pch = 16, col = point_color, cex = 1.1)
   
   # Add a reference line showing theoretical convergence rate
-  n_ref <- n_values[1]
-  ise_ref <- exp(summary_stats$mean_log_ise[summary_stats$n == n_ref])
-  theoretical_line <- log(ise_ref) + theoretical_rate * (log(n_values) - log(n_ref))
+  n_ref = n_values[1]
+  ise_ref = exp(summary_stats$mean_log_ise[summary_stats$n == n_ref])
+  theoretical_line = log(ise_ref) + theoretical_rate * (log(n_values) - log(n_ref))
   lines(log(n_values), theoretical_line, col = ref_color, lwd = 2, lty = 2)
   
   # Add segment slope annotations with increased vertical offset
   for (j in 1:(length(x_values) - 1)) {
-    mid_x <- (x_values[j] + x_values[j+1]) / 2
+    mid_x = (x_values[j] + x_values[j+1]) / 2
     # Increased vertical offset from 0.3 to 0.8
-    mid_y <- (y_values[j] + y_values[j+1]) / 2 + 0.8  
+    mid_y = (y_values[j] + y_values[j+1]) / 2 + 0.8  
     text(mid_x, mid_y, sprintf("%.2f", segment_slopes[j]), 
          cex = 0.8, col = slope_color)
   }
   
   # Add text box for slope info
-  text_box_x <- mean(par("usr")[1:2])
-  text_box_y <- par("usr")[3] + 0.15 * diff(par("usr")[3:4])
+  text_box_x = mean(par("usr")[1:2])
+  text_box_y = par("usr")[3] + 0.15 * diff(par("usr")[3:4])
   
   # Create a cleaner text box
   rect(par("usr")[1] + 0.05 * diff(par("usr")[1:2]), 
@@ -1870,31 +1870,31 @@ create_enhanced_plot <- function(df_subset, analysis_results, shape, scale,
 }
 
 # Main analysis loop for each Weibull parameter combination
-weibull_params <- unique(all_results_df[, c("shape", "scale")])
+weibull_params = unique(all_results_df[, c("shape", "scale")])
 for (i in 1:nrow(weibull_params)) {
-  current_shape <- weibull_params$shape[i]
-  current_scale <- weibull_params$scale[i]
+  current_shape = weibull_params$shape[i]
+  current_scale = weibull_params$scale[i]
   
   # Get subset of results for current parameters
-  df_subset <- subset(all_results_df, shape == current_shape & scale == current_scale)
+  df_subset = subset(all_results_df, shape == current_shape & scale == current_scale)
   
   # Create a list to store results for all estimators
-  all_estimator_results <- list()
+  all_estimator_results = list()
   
   # Set up plot grid
   par(mfrow = c(2, 2))
   
   # Analyze each estimator
-  estimators <- c("IW", "KDE", "NW", "FD")
-  ise_columns <- c("iter_ise", "kde_ise", "direct_ise", "fd_ise")
+  estimators = c("IW", "KDE", "NW", "FD")
+  ise_columns = c("iter_ise", "kde_ise", "direct_ise", "fd_ise")
   
   for (e in 1:length(estimators)) {
-    estimator <- estimators[e]
-    ise_col <- ise_columns[e]
+    estimator = estimators[e]
+    ise_col = ise_columns[e]
     
     # Analyze convergence
-    analysis_results <- analyze_convergence(df_subset, n_values, estimator, ise_col)
-    all_estimator_results[[estimator]] <- analysis_results
+    analysis_results = analyze_convergence(df_subset, n_values, estimator, ise_col)
+    all_estimator_results[[estimator]] = analysis_results
     
     # Create plot
     create_enhanced_plot(df_subset, analysis_results, current_shape, current_scale, 
@@ -1905,9 +1905,9 @@ for (i in 1:nrow(weibull_params)) {
   par(mfrow = c(1, 1))
   
   # Get y-range for all estimators
-  all_y_values <- unlist(lapply(all_estimator_results, function(x) x$y_values))
-  y_range <- range(all_y_values)
-  y_padding <- 0.1 * diff(y_range)
+  all_y_values = unlist(lapply(all_estimator_results, function(x) x$y_values))
+  y_range = range(all_y_values)
+  y_padding = 0.1 * diff(y_range)
   
   # Set up comparison plot
   plot(log(n_values), log(n_values), type = "n",
@@ -1928,16 +1928,16 @@ for (i in 1:nrow(weibull_params)) {
   box()
   
   # Updated colors for better distinction
-  colors <- c("#0066CC",    # Dark blue (IW)
+  colors = c("#0066CC",    # Dark blue (IW)
               
               "#009933",    # Dark green (NW)
               "#FF6600",# Orange (KDE)
               "#CC3366")    # Dark purple (FD)
-  ltys <- c(1, 2, 3, 4)
+  ltys = c(1, 2, 3, 4)
   
   for (e in 1:length(estimators)) {
-    estimator <- estimators[e]
-    results <- all_estimator_results[[estimator]]
+    estimator = estimators[e]
+    results = all_estimator_results[[estimator]]
     
     # Plot line and points
     lines(results$x_values, results$y_values, 
@@ -1947,11 +1947,11 @@ for (i in 1:nrow(weibull_params)) {
   }
   
   # Add legend with full estimator names and slopes
-  legend_text <- sapply(1:length(estimators), function(e) {
-    estimator <- estimators[e]
-    results <- all_estimator_results[[estimator]]
+  legend_text = sapply(1:length(estimators), function(e) {
+    estimator = estimators[e]
+    results = all_estimator_results[[estimator]]
     
-    full_name <- switch(estimator,
+    full_name = switch(estimator,
                         "IW" = "Iterative Weights",
                         "NW" = "Normal Weights",
                         "KDE" = "KDE",
@@ -1972,7 +1972,7 @@ for (i in 1:nrow(weibull_params)) {
 ######
 ##################################################################
 # Function to generate a LaTeX table of results for the Weibull distribution
-generate_latex_table_weibull <- function(all_estimator_results, current_shape, current_scale) {
+generate_latex_table_weibull = function(all_estimator_results, current_shape, current_scale) {
   cat("\\begin{table}[ht]\n")
   cat("\\centering\n")
   cat("\\caption{Convergence Rate Analysis for Weibull(", current_shape, ",", current_scale, ")}\n")
@@ -1981,12 +1981,12 @@ generate_latex_table_weibull <- function(all_estimator_results, current_shape, c
   cat("Estimator & Empirical Rate & Theoretical Rate & 95\\% CI \\\\\n")
   cat("\\hline\n")
   
-  estimators <- names(all_estimator_results)
+  estimators = names(all_estimator_results)
   for (estimator in estimators) {
-    results <- all_estimator_results[[estimator]]
+    results = all_estimator_results[[estimator]]
     
     # Get full estimator name for the table
-    full_estimator_name <- switch(estimator,
+    full_estimator_name = switch(estimator,
                                   "IW" = "Iterative Weights",
                                   "NW" = "Normal Weights",
                                   "KDE" = "KDE",
@@ -2007,29 +2007,29 @@ generate_latex_table_weibull <- function(all_estimator_results, current_shape, c
   cat("\\end{table}\n\n")
 }
 
-weibull_params <- unique(all_results_df[, c("shape", "scale")])
+weibull_params = unique(all_results_df[, c("shape", "scale")])
 
 for (i in 1:nrow(weibull_params)) {
-  current_shape <- weibull_params$shape[i]
-  current_scale <- weibull_params$scale[i]
+  current_shape = weibull_params$shape[i]
+  current_scale = weibull_params$scale[i]
   
   # Filter results for this shape/scale combination
-  df_subset <- subset(all_results_df, shape == current_shape & scale == current_scale)
+  df_subset = subset(all_results_df, shape == current_shape & scale == current_scale)
   
   # Create a list to store results for all estimators
-  all_estimator_results <- list()
+  all_estimator_results = list()
   
   # Analyze each estimator
-  estimators <- c("IW", "KDE", "NW", "FD")
-  ise_columns <- c("iter_ise", "kde_ise", "direct_ise", "fd_ise")
+  estimators = c("IW", "KDE", "NW", "FD")
+  ise_columns = c("iter_ise", "kde_ise", "direct_ise", "fd_ise")
   
   for (e in 1:length(estimators)) {
-    estimator <- estimators[e]
-    ise_col <- ise_columns[e]
+    estimator = estimators[e]
+    ise_col = ise_columns[e]
     
     # Analyze convergence
-    analysis_results <- analyze_convergence(df_subset, n_values, estimator, ise_col)
-    all_estimator_results[[estimator]] <- analysis_results
+    analysis_results = analyze_convergence(df_subset, n_values, estimator, ise_col)
+    all_estimator_results[[estimator]] = analysis_results
   }
   
   # Generate the LaTeX table for this parameter combination
